@@ -1,1 +1,32 @@
-
+name: Build ALAM Keyboard APK
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'ALAM_AI_Stylish_Keyboard.zip'
+      - '.github/workflows/android.yml'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract project ZIP
+        run: |
+          test -f ALAM_AI_Stylish_Keyboard.zip
+          mkdir -p extracted
+          unzip -q -o ALAM_AI_Stylish_Keyboard.zip -d extracted
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Build APK
+        working-directory: extracted
+        run: gradle :app:assembleDebug --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ALAM-AI-Stylish-Keyboard-APK
+          path: extracted/app/build/outputs/apk/debug/*.apk
